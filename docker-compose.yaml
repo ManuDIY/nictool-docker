@@ -1,0 +1,55 @@
+version: "3"
+services:
+  nictool:
+    build:
+      context: .
+      args:
+       dbhostname: nictool-mysql
+       dbrootpw: ROOTPASSWORD
+       nictooldbname: nictool
+       nictooldbuser: nictool
+       nictooldbpass: DBPASSWORD
+       rootuseremail: admin@example.com
+       rootuserpass: CHANGEME
+       certcn: nictool.example.com
+       certcountry: US
+       certstate: CA
+       certlocality: Los Angeles
+       certorg: Example Inc
+       certou: Admins
+       certemail: admin@example.com
+       # Comma-separated list of nameservers for export
+       ntnameservers: ns001.example.com, ns002.example.com, ns003.example.com
+    image: nictool:latest
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8082:8082"
+    volumes:
+      - nt_exports:/usr/local/nictool/ns
+    networks:
+      - nictool
+    container_name: nictool-web
+    restart: always
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ROOTPASSWORD
+      MYSQL_DATABASE: nictool
+      MYSQL_USER: nictool
+      MYSQL_PASSWORD: DBPASSWORD
+    container_name: nictool-mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-conf:/etc/mysql/conf.d
+      - nt_mysql:/var/lib/mysql
+    networks:
+      - nictool
+    restart: always
+volumes:
+  nt_mysql:
+  nt_exports:
+networks:
+  nictool:
+    driver: bridge
